@@ -10,7 +10,7 @@ contract FundCrypto {
         uint256 deadline;
         uint256 ammountCollected;
         string image;
-        address[] donators;
+        address[] donators; 
         uint256[] donations; 
     }
     mapping(uint256 => Campaign) public campaigns;
