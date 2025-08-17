@@ -5,9 +5,18 @@
   "dependencies": {
     "@thirdweb-dev/react": "^4.9.4",
     "@thirdweb-dev/sdk": "^4.0.99",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "browserify-zlib": "^0.2.0",
+    "ethers": "^5.7.2",
+    "https-browserify": "^1.0.0",
+    "install": "^0.13.0",
+    "npm": "^11.5.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.1",
     "react-scripts": "5.0.1",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "thirdweb": "^5.105.33",
     "web-vitals": "^2.1.4"
   },
   "repository": {

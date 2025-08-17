@@ -4,18 +4,18 @@ import App from "./App";
 import "./index.css";
 import {BrowserRouter} from "react-router-dom"
 
-import {chainId, ThirdWebProvider} from "@thirdweb-dev/react"
-import { StateContextProvider } from "./context";
+import { ThirdwebProvider } from "thirdweb/react";
+import { StateContextProvider } from "./context/index";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <ThirdWebProvider desiredChainId={chainId.sepolia}>
-    <BrowserRouter>
+  <ThirdwebProvider activeChain="sepolia">
       <React.StrictMode>
         <StateContextProvider>
-          <App />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
         </StateContextProvider>
       </React.StrictMode>
-    </BrowserRouter>
-  </ThirdWebProvider>
+  </ThirdwebProvider>
 );
