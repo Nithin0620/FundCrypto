@@ -1,6 +1,6 @@
-require("@matterlabs/hardhat-zksync-solc");
-require("@matterlabs/hardhat-zksync-verify");
-require("dotenv").config();
+import { HardhatUserConfig } from "hardhat/config";
+import "@nomicfoundation/hardhat-ethers";
+import "dotenv/config";
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {

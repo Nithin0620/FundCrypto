@@ -1,9 +1,9 @@
 export const daysLeft = (deadline) => {
-   const difference = new Date(deadline).getTime() - Date.now();
-   const remainingDays = difference / (1000 * 3600 * 24);
-
-   return remainingDays.toFixed(0);
+  const deadlineInMs = Number(deadline) * 1000; // convert seconds → ms
+  const difference = deadlineInMs - Date.now();
+  return Math.max(0, Math.floor(difference / (1000 * 60 * 60 * 24)));
 };
+
 
 export const calculateBarPercentage = (goal, raisedAmount) => {
    const percentage = Math.round((raisedAmount * 100) / goal);

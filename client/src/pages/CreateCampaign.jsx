@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { ethers } from 'ethers';
 
 import { useStateContext } from '../context';
 import { money } from '../assets';
@@ -13,7 +11,8 @@ import { checkIfImage } from '../utils';
 const CreateCampaign = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const { createCampaign } = useStateContext();
+  const [errors, setErrors] = useState({});
+  const { createCampaign, address } = useStateContext();
   const [form, setForm] = useState({
     name: '',
     title: '',
@@ -25,22 +24,96 @@ const CreateCampaign = () => {
 
   const handleFormFieldChange = (fieldName, e) => {
     setForm({ ...form, [fieldName]: e.target.value })
+    // Clear error when user starts typing
+    if (errors[fieldName]) {
+      setErrors({ ...errors, [fieldName]: '' });
+    }
   }
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!form.title.trim()) {
+      newErrors.title = 'Title is required';
+    }
+    
+    if (!form.description.trim()) {
+      newErrors.description = 'Description is required';
+    }
+    
+    if (!form.target) {
+      newErrors.target = 'Target amount is required';
+    } else {
+      const targetNum = parseFloat(form.target);
+      if (isNaN(targetNum) || targetNum <= 0) {
+        newErrors.target = 'Target amount must be a valid number greater than 0';
+      }
+    }
+    
+    if (!form.deadline) {
+      newErrors.deadline = 'Deadline is required';
+    } else {
+      const selectedDate = new Date(form.deadline);
+      const now = new Date();
+      
+      if (selectedDate <= now) {
+        newErrors.deadline = 'Deadline must be in the future';
+      }
+    }
+    
+    if (!form.image.trim()) {
+      newErrors.image = 'Image URL is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if wallet is connected
+    // if (!address) {
+    //   alert('Please connect your wallet first');
+    //   return;
+    // }
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+
+    // Check image validity
     checkIfImage(form.image, async (exists) => {
       if(exists) {
-        setIsLoading(true)
-        await createCampaign({ ...form, target: ethers.utils.parseUnits(form.target, 18)})
-        setIsLoading(false);
-        navigate('/');
+        setIsLoading(true);
+        try {
+          // Convert target to wei format (string to be handled in context)
+          const campaignData = {
+            ...form,
+            target: form.target // Keep as string, will be converted to wei in context
+          };
+          
+          console.log('Submitting campaign:', campaignData);
+          
+          await createCampaign(campaignData);
+          
+          console.log('Campaign created successfully!');
+          navigate('/');
+        } catch (error) {
+          console.error('Error creating campaign:', error);
+          
+          // Display user-friendly error messages
+          
+        } finally {
+          setIsLoading(false);
+        }
       } else {
-        alert('Provide valid image URL')
+        alert('Please provide a valid image URL');
         setForm({ ...form, image: '' });
+        setErrors({ ...errors, image: 'Please provide a valid image URL' });
       }
-    })
+    });
   }
 
   return (
@@ -54,7 +127,7 @@ const CreateCampaign = () => {
         <div className="flex flex-wrap gap-[40px]">
           <FormField 
             labelName="Your Name *"
-            placeholder="Sharma Ji.."
+            placeholder="John Doe"
             inputType="text"
             value={form.name}
             handleChange={(e) => handleFormFieldChange('name', e)}
@@ -66,15 +139,17 @@ const CreateCampaign = () => {
             value={form.title}
             handleChange={(e) => handleFormFieldChange('title', e)}
           />
+          {errors.title && <span className="text-red-500 text-sm">{errors.title}</span>}
         </div>
 
         <FormField 
-            labelName="Story *"
-            placeholder="Write your story"
-            isTextArea
-            value={form.description}
-            handleChange={(e) => handleFormFieldChange('description', e)}
-          />
+          labelName="Story *"
+          placeholder="Write your story"
+          isTextArea
+          value={form.description}
+          handleChange={(e) => handleFormFieldChange('description', e)}
+        />
+        {errors.description && <span className="text-red-500 text-sm">{errors.description}</span>}
 
         <div className="w-full flex justify-start items-center p-4 bg-[#8c6dfd] h-[120px] rounded-[10px]">
           <img src={money} alt="money" className="w-[40px] h-[40px] object-contain"/>
@@ -85,10 +160,12 @@ const CreateCampaign = () => {
           <FormField 
             labelName="Goal *"
             placeholder="ETH 0.50"
-            inputType="text"
+            inputType="number"
             value={form.target}
             handleChange={(e) => handleFormFieldChange('target', e)}
           />
+          {errors.target && <span className="text-red-500 text-sm">{errors.target}</span>}
+          
           <FormField 
             labelName="End Date *"
             placeholder="End Date"
@@ -96,23 +173,25 @@ const CreateCampaign = () => {
             value={form.deadline}
             handleChange={(e) => handleFormFieldChange('deadline', e)}
           />
+          {errors.deadline && <span className="text-red-500 text-sm">{errors.deadline}</span>}
         </div>
 
         <FormField 
-            labelName="Campaign image *"
-            placeholder="Place image URL of your campaign"
-            inputType="url"
-            value={form.image}
-            handleChange={(e) => handleFormFieldChange('image', e)}
-          />
+          labelName="Campaign image *"
+          placeholder="Place image URL of your campaign"
+          inputType="url"
+          value={form.image}
+          handleChange={(e) => handleFormFieldChange('image', e)}
+        />
+        {errors.image && <span className="text-red-500 text-sm">{errors.image}</span>}
 
-          <div className="flex justify-center items-center mt-[40px]">
-            <CustomButton 
-              btnType="submit"
-              title="Submit new campaign"
-              styles="bg-[#1dc071]"
-            />
-          </div>
+        <div className="flex justify-center items-center mt-[40px]">
+          <CustomButton 
+            btnType="submit"
+            title="Submit new campaign"
+            styles="bg-[#1dc071]"
+          />
+        </div>
       </form>
     </div>
   )
